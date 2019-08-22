@@ -28,6 +28,19 @@ namespace RocksDbSharp
             References.CfOptions = cfOptionsRefs;
             this.columnFamilies = columnFamilies;
         }
+        protected RocksDb(IntPtr handle, DbOptions dbOptions, ColumnFamilies columnFamilyOptions, Dictionary<string, ColumnFamilyHandleInternal> cfHandleMap = null)
+        {
+            this.Handle = handle;
+            if (dbOptions != null)
+            {
+                References.Options = dbOptions.References;
+            }
+            if (columnFamilyOptions != null)
+            {
+                References.CfOptions = columnFamilyOptions.Select(cfd => cfd.Options.References).ToArray();
+            }
+            this.columnFamilies = cfHandleMap;
+        }
 
         public void Dispose()
         {
@@ -36,6 +49,10 @@ namespace RocksDbSharp
                 foreach (var cfh in columnFamilies.Values)
                     cfh.Dispose();
             }
+            CloseDB();
+        }
+        protected virtual void CloseDB()
+        {
             Native.Instance.rocksdb_close(Handle);
         }
 

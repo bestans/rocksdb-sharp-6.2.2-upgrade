@@ -13,7 +13,7 @@ namespace RocksDbSharp
         IntPtr Handle { get; }
     }
 
-    class ColumnFamilyHandleInternal : ColumnFamilyHandle, IDisposable
+    public class ColumnFamilyHandleInternal : ColumnFamilyHandle, IDisposable
     {
         public ColumnFamilyHandleInternal(IntPtr handle)
         {

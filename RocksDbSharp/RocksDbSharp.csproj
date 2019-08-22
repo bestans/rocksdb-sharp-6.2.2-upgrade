@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\Versions.targets.include"/>
+  <Import Project="..\Versions.targets.include" />
   <PropertyGroup>
     <Title>RocksDbSharp</Title>
     <TargetFrameworks>netstandard1.6;net40;net45</TargetFrameworks>

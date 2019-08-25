@@ -123,5 +123,15 @@ namespace RocksDbSharp
                 return valLength;
             }
         }
+        
+        public void Delete(string key, ColumnFamilyHandle cf = null, Encoding encoding = null)
+        {
+            Native.Instance.rocksdb_transaction_delete(Handle, key, cf, encoding);
+        }
+        
+        public void Remove(byte[] key, ColumnFamilyHandle cf = null)
+        {
+            Native.Instance.rocksdb_transaction_delete(Handle, key, cf);
+        }
     }
 }

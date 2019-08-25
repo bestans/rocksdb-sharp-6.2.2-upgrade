@@ -171,32 +171,31 @@ namespace RocksDbSharp
                 throw new RocksDbException(errptr);
             return result;
         }
-
-
-        //public void rocksdb_transaction_delete(
-        //    /*rocksdb_t**/ IntPtr db,
-        //    /*const*/ string key,
-        //    ColumnFamilyHandle cf)
-        //{
-        //    rocksdb_transaction_delete(db, key, cf);
-        //    if (errptr != IntPtr.Zero)
-        //        throw new RocksDbException(errptr);
-        //}
-
+        
         public void rocksdb_transaction_delete(
             /* rocksdb_transaction_t* */ IntPtr txn,
             /*const*/ string key,
-            out IntPtr errptr,
             ColumnFamilyHandle cf,
             Encoding encoding = null)
         {
             var bkey = (encoding ?? Encoding.UTF8).GetBytes(key);
             UIntPtr kLength = (UIntPtr)bkey.GetLongLength(0);
             if (cf == null)
-                rocksdb_transaction_delete(txn, bkey, kLength, out errptr);
-            //rocksdb_transaction_delete(db, writeOptions, bkey, kLength, out errptr);
+                rocksdb_transaction_delete(txn, bkey, kLength);
             else
-                rocksdb_transaction_delete_cf(txn, cf.Handle, bkey, kLength, out errptr);
+                rocksdb_transaction_delete_cf(txn, cf.Handle, bkey, kLength);
+        }
+
+        public void rocksdb_transaction_delete(
+            /* rocksdb_transaction_t* */ IntPtr txn,
+            /*const*/ byte[] key,
+            ColumnFamilyHandle cf)
+        {
+            UIntPtr kLength = (UIntPtr)key.GetLongLength(0);
+            if (cf == null)
+                rocksdb_transaction_delete(txn, key, kLength);
+            else
+                rocksdb_transaction_delete_cf(txn, cf.Handle, key, kLength);
         }
     }
 }

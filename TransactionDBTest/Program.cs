@@ -33,13 +33,57 @@ namespace TransactionDBTest
             "俺的沙发斯蒂芬结案率时代峻峰看见爱上了肯定积分卡萨看来大家福利卡加适量快递费即可拉伸俺的沙发斯蒂芬结案率时代峻峰看见爱上了肯定积分卡萨看来大家福利卡加适量快递费即可拉伸俺的沙发斯蒂芬结案率时代峻峰看见爱上了肯定积分卡萨看来大家福利卡加适量快递费即可拉伸俺的沙发斯蒂芬结案率时";
 
         static string key = "1111";
+        static string testkey = "aaa";
         static byte[] keyb = System.Text.Encoding.Default.GetBytes(key);
         static void Main(string[] args)
         {
-            test3();
+            test5();
             Console.ReadKey();
         }
-        
+
+        static void test5()
+        {
+            var db = TransactionDB.Open(new DbOptions().SetCreateIfMissing(true), new TransactionDBOptions(), "transaction_db_test");
+            using (var it = db.NewIterator())
+            {
+                it.SeekToFirst();
+                while (it.Valid())
+                {
+                    var key = Encoding.Default.GetString(it.Key());
+                    var value = Encoding.Default.GetString(it.Value());
+                    Console.WriteLine("key=" + key + ",value=" + value);
+                    it.Next();
+                }
+            }
+            
+        }
+        static void test4()
+        {
+            var db = TransactionDB.Open(new DbOptions().SetCreateIfMissing(true), new TransactionDBOptions(), "transaction_db_test");
+            var txnOp = new TransactionOptions();
+            var wop = new WriteOptions();
+            int count = 0;
+            while (true)
+            {
+                var txn = new Transaction(db, wop, txnOp);
+                string key = testkey;
+                txn.Put(key, data + count++);
+                txn.Get(key);
+                txn.Put(key, data + count++);
+                txn.Get(key);
+                txn.Put(key, data + count++);
+                txn.Get(key);
+                if (count % 2 == 0)
+                    txn.Commit();
+                else
+                    txn.Rollback();
+                if (count % 30000 == 0)
+                {
+                    Console.WriteLine("run count:" + count / 3);
+                }
+                Thread.Sleep(1);
+            }
+        }
         static void test3()
         {
             var db = TransactionDB.Open(new DbOptions().SetCreateIfMissing(true), new TransactionDBOptions(), "transaction_db_test");

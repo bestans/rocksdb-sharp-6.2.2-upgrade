@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RocksDbSharp
 {
-    public abstract class RocksDBObject
+    public abstract class RocksDBObject : BDisposable
     {
         //其他类引用这个变量，就不会被垃圾回收掉
         internal dynamic References { get; } = new ExpandoObject();

@@ -8,7 +8,7 @@ using Transitional;
 
 namespace RocksDbSharp
 {
-    public class RocksDb : IDisposable
+    public class RocksDb : BDisposable
     {
         internal static ReadOptions DefaultReadOptions { get; } = new ReadOptions();
         internal static OptionsHandle DefaultOptions { get; } = new DbOptions();
@@ -42,7 +42,7 @@ namespace RocksDbSharp
             this.columnFamilies = cfHandleMap;
         }
 
-        public void Dispose()
+        protected override void OnDispose()
         {
             if (columnFamilies != null)
             {
@@ -51,6 +51,7 @@ namespace RocksDbSharp
             }
             CloseDB();
         }
+
         protected virtual void CloseDB()
         {
             Native.Instance.rocksdb_close(Handle);
@@ -291,8 +292,17 @@ namespace RocksDbSharp
             return columnFamilies[name];
         }
 
+        public Dictionary<string, ColumnFamilyHandleInternal> GetColumnFamilyHandleMap()
+        {
+            return columnFamilies;
+        }
+        
         public string GetProperty(string propertyName)
         {
+            foreach (var it in columnFamilies)
+            {
+
+            }
             return Native.Instance.rocksdb_property_value_string(Handle, propertyName);
         }
 

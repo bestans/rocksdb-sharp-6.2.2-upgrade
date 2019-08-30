@@ -10,15 +10,10 @@ namespace RocksDbSharp
         {
             Handle = Native.Instance.rocksdb_transactiondb_options_create();
         }
-        ~TransactionDBOptions()
+        protected override void OnDispose()
         {
-            if (Handle != IntPtr.Zero)
-            {
-                Native.Instance.rocksdb_transactiondb_options_destroy(Handle);
-                Handle = IntPtr.Zero;
-            }
+            Native.Instance.rocksdb_transactiondb_options_destroy(Handle);
         }
-
         public void SetMaxNumLocks(Int64 param)
         {
             Native.Instance.rocksdb_transactiondb_options_set_max_num_locks(Handle, param);

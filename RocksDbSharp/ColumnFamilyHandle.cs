@@ -13,7 +13,7 @@ namespace RocksDbSharp
         IntPtr Handle { get; }
     }
 
-    public class ColumnFamilyHandleInternal : ColumnFamilyHandle, IDisposable
+    public class ColumnFamilyHandleInternal : BDisposable, ColumnFamilyHandle
     {
         public ColumnFamilyHandleInternal(IntPtr handle)
         {
@@ -22,7 +22,7 @@ namespace RocksDbSharp
 
         public IntPtr Handle { get; protected set; }
 
-        public void Dispose()
+        protected override void OnDispose()
         {
             if (Handle != IntPtr.Zero)
             {

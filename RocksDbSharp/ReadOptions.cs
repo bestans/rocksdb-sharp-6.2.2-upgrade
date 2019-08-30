@@ -8,7 +8,7 @@ using Transitional;
 
 namespace RocksDbSharp
 {
-    public class ReadOptions
+    public class ReadOptions : BDisposable
     {
         private IntPtr iterateUpperBound;
 
@@ -18,8 +18,8 @@ namespace RocksDbSharp
         }
 
         public IntPtr Handle { get; protected set; }
-
-        ~ReadOptions()
+        
+        protected override void OnDispose()
         {
             if (Handle != IntPtr.Zero)
             {

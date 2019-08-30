@@ -10,13 +10,9 @@ namespace RocksDbSharp
         {
             Handle = Native.Instance.rocksdb_transaction_options_create();
         }
-        ~TransactionOptions()
+        protected override void OnDispose()
         {
-            if (Handle != IntPtr.Zero)
-            {
-                Native.Instance.rocksdb_transaction_options_destroy(Handle);
-                Handle = IntPtr.Zero;
-            }
+            Native.Instance.rocksdb_transaction_options_destroy(Handle);
         }
         public void SetExpiration(Int64 expiration)
         {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RocksDbSharp
 {
-    public class Checkpoint : IDisposable
+    public class Checkpoint : BDisposable
     {
         public IntPtr Handle { get; }
 
@@ -13,12 +13,12 @@ namespace RocksDbSharp
             Handle = handle;
         }
 
-        public void Save(string checkpointDir, ulong logSizeForFlush = 0)
-            => Native.Instance.rocksdb_checkpoint_create(Handle, checkpointDir, logSizeForFlush);
-
-        public void Dispose()
+        protected override void OnDispose()
         {
             Native.Instance.rocksdb_checkpoint_object_destroy(Handle);
         }
+
+        public void Save(string checkpointDir, ulong logSizeForFlush = 0)
+            => Native.Instance.rocksdb_checkpoint_create(Handle, checkpointDir, logSizeForFlush);
     }
 }

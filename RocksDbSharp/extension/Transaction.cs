@@ -7,7 +7,7 @@ using Transitional;
 
 namespace RocksDbSharp
 {
-    public class Transaction : RocksDBObject, IDisposable
+    public class Transaction : RocksDBObject
     {
         public static int count = 0;
 
@@ -16,29 +16,15 @@ namespace RocksDbSharp
         internal static WriteOptions DefaultWriteOptions { get; } = new WriteOptions();
         internal static Encoding DefaultEncoding => Encoding.UTF8;
 
-        private static readonly object Lock = new object();
-
         public Transaction(TransactionDB txnDB, WriteOptions wop, TransactionOptions txnOptions)
         {
             Handle = Native.Instance.rocksdb_transaction_begin(txnDB.Handle, wop.Handle, txnOptions.Handle, IntPtr.Zero);
         }
-
-        ~Transaction()
-        {
-            Dispose();
-        }
         
-        public void Dispose()
+        protected override void OnDispose()
         {
-            lock(Lock)  //防止重复析构
-            {
-                if (Handle != IntPtr.Zero)
-                {
-                    Native.Instance.rocksdb_transaction_destroy(Handle);
-                    Handle = IntPtr.Zero;
-                    ++count;
-                }
-            }
+            Native.Instance.rocksdb_transaction_destroy(Handle);
+            Handle = IntPtr.Zero;
         }
 
         public void Commit()
@@ -129,7 +115,7 @@ namespace RocksDbSharp
             Native.Instance.rocksdb_transaction_delete(Handle, key, cf, encoding);
         }
         
-        public void Remove(byte[] key, ColumnFamilyHandle cf = null)
+        public void Delete(byte[] key, ColumnFamilyHandle cf = null)
         {
             Native.Instance.rocksdb_transaction_delete(Handle, key, cf);
         }

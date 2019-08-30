@@ -8,7 +8,7 @@ using Transitional;
 
 namespace RocksDbSharp
 {
-    public class Iterator : IDisposable
+    public class Iterator : BDisposable
     {
         private IntPtr handle;
         #pragma warning disable CS0414
@@ -31,7 +31,7 @@ namespace RocksDbSharp
 
         public IntPtr Handle { get { return handle; } }
 
-        public void Dispose()
+        protected override void OnDispose()
         {
             if (handle != IntPtr.Zero)
             {

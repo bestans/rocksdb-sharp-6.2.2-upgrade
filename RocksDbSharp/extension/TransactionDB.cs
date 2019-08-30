@@ -10,6 +10,7 @@ namespace RocksDbSharp
             : base(handle, dbOptions, columnFamilyOptions, cfHandleMap)
         {
         }
+
         protected override void CloseDB()
         {
             Native.Instance.rocksdb_transactiondb_close(Handle);

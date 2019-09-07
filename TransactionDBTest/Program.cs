@@ -37,8 +37,35 @@ namespace TransactionDBTest
         static byte[] keyb = System.Text.Encoding.Default.GetBytes(key);
         static void Main(string[] args)
         {
-            test5();
+            test6();
             Console.ReadKey();
+        }
+
+        static void test6()
+        {
+            var dbop = new DbOptions()
+                .SetCreateIfMissing(true)
+                .SetCreateMissingColumnFamilies(true);
+
+            var columnFamilies = new ColumnFamilies
+            {
+                { "reverse1", new ColumnFamilyOptions() },
+                { "reverse2", new ColumnFamilyOptions() },
+            };
+            var db = TransactionDB.Open(dbop, new TransactionDBOptions(), "transaction_db_test2", columnFamilies);
+
+            var reverse = db.GetColumnFamily("reverse1");
+            db.Put("uno", "one", cf: reverse);
+            db.Put("dos", "two", cf: reverse);
+            db.Put("tres", "three", cf: reverse);
+            db.Dispose();
+
+            db = TransactionDB.Open(new DbOptions().SetCreateIfMissing(true), new TransactionDBOptions(), "transaction_db_test2", columnFamilies);
+            reverse = db.GetColumnFamily("reverse1");
+            Console.WriteLine(db.Get("uno", reverse));
+            Console.WriteLine(db.Get("dos", reverse));
+            Console.WriteLine(db.Get("tres", reverse));
+            db.Dispose();
         }
 
         static void test5()

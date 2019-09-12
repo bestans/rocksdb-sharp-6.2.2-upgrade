@@ -34,5 +34,10 @@ namespace RocksDbSharp
                 cfHandleMap.Add(pair.Name, pair.Handle);
             return new TransactionDB(db, options, columnFamilies, cfHandleMap);
         }
+
+        public Transaction NewTransaction(WriteOptions wop, TransactionOptions txnOptions)
+        {
+            return new Transaction(this, wop, txnOptions);
+        }
     }
 }

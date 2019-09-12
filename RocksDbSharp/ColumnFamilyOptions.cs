@@ -11,6 +11,8 @@ namespace RocksDbSharp
 {
     public class ColumnFamilyOptions : OptionsHandle
     {
+        public static ColumnFamilyOptions DEFAULT = new ColumnFamilyOptions();
+
         ComparatorReferences ComparatorRef { get; set; }
         MergeOperatorReferences MergeOperatorRef { get; set; }
 

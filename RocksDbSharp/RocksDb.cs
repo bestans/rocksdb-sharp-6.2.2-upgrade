@@ -121,6 +121,31 @@ namespace RocksDbSharp
             return new Checkpoint(checkpoint);
         }
 
+        /// <summary>
+        /// Builds an openable snapshot of RocksDB on the same disk, which
+        /// accepts an output directory on the same disk, and under the directory
+        /// (1) hard-linked SST files pointing to existing live SST files
+        /// SST files will be copied if output directory is on a different filesystem
+        /// (2) a copied manifest files and other files
+        /// The directory should not already exist and will be created by this API.
+        /// The directory will be an absolute path
+        /// log_size_for_flush: if the total log file size is equal or larger than
+        /// this value, then a flush is triggered for all the column families. The
+        /// default value is 0, which means flush is always triggered. If you move
+        /// away from the default, the checkpoint may not contain up-to-date data
+        /// if WAL writing is not always enabled.
+        /// Flush will always trigger if it is 2PC.
+        /// 
+        /// </summary>
+        /// <param name="checkpointDir">绝对路径，又该接口创建文件夹</param>
+        /// <param name="logSizeForFlush">if the total log file size is equal or larger than this value, then a flush is triggered for all the column families.</param>
+        public void CheckPoint(string checkpointDir, ulong logSizeForFlush = 0)
+        {
+            var cp = Checkpoint();
+            cp.Save(checkpointDir, logSizeForFlush);
+            cp.Dispose();
+        }
+
         public void SetOptions(IEnumerable<KeyValuePair<string, string>> options)
         {
             var keys = options.Select(e => e.Key).ToArray();

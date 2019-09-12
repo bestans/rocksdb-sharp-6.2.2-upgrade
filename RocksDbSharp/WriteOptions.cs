@@ -2,25 +2,16 @@
 
 namespace RocksDbSharp
 {
-    public class WriteOptions
+    public class WriteOptions : BDisposable
     {
+        public static WriteOptions DEFAULT = new WriteOptions();
+
         public WriteOptions()
         {
             Handle = Native.Instance.rocksdb_writeoptions_create();
         }
 
         public IntPtr Handle { get; protected set; }
-
-        ~WriteOptions()
-        {
-            if (Handle != IntPtr.Zero)
-            {
-#if !NODESTROY
-                Native.Instance.rocksdb_writeoptions_destroy(Handle);
-#endif
-                Handle = IntPtr.Zero;
-            }
-        }
 
         public WriteOptions SetSync(bool value)
         {
@@ -34,6 +25,12 @@ namespace RocksDbSharp
             return this;
         }
 
-
+        protected override void OnDispose()
+        {
+#if !NODESTROY
+            Native.Instance.rocksdb_writeoptions_destroy(Handle);
+#endif
+            Handle = IntPtr.Zero;
+        }
     }
 }

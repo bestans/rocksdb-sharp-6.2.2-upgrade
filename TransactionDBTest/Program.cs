@@ -37,8 +37,127 @@ namespace TransactionDBTest
         static byte[] keyb = System.Text.Encoding.Default.GetBytes(key);
         static void Main(string[] args)
         {
-            test6();
+            Test8();
             Console.ReadKey();
+        }
+        static void Test9()
+        {
+            var dbop = new DbOptions()
+                .SetCreateIfMissing(true)
+                .SetCreateMissingColumnFamilies(true);
+
+            var columnFamilies = new ColumnFamilies
+            {
+                { "reverse1", new ColumnFamilyOptions() },
+                { "reverse2", new ColumnFamilyOptions() },
+            };
+            var db = TransactionDB.Open(dbop, new TransactionDBOptions(), "transaction_db_test5", columnFamilies);
+            var reverse = db.GetColumnFamily("reverse1");
+            var wop = new WriteOptions();
+
+            for (int i = 0; i < 10; i += 2)
+            {
+                db.Put(i.ToString(), i.ToString(), reverse);
+            }
+            Console.WriteLine("begin");
+            var t1 = Task.Run(async () =>
+            {
+                var it = db.NewIterator(reverse);
+                it.SeekToFirst();
+                while (it.Valid())
+                {
+                    Console.WriteLine("it:key=" + it.StringKey() +",value" + it.StringValue());
+                    await Task.Delay(500);
+                    it.Next();
+                }
+            });
+            var t2 = Task.Run(async () =>
+            {
+                for (int i = 1; i < 10; i += 2)
+                {
+                    await Task.Delay(500);
+                    db.Remove(i.ToString());
+                    Console.WriteLine("write key=" + i);
+                }
+            });
+            Task.WaitAll(t1, t2);
+        }
+        static void Test8()
+        {
+            var dbop = new DbOptions()
+                .SetCreateIfMissing(true)
+                .SetCreateMissingColumnFamilies(true);
+
+            var columnFamilies = new ColumnFamilies
+            {
+                { "reverse1", new ColumnFamilyOptions() },
+                { "reverse2", new ColumnFamilyOptions() },
+            };
+            var db = TransactionDB.Open(dbop, new TransactionDBOptions(), "transaction_db_test2", columnFamilies);
+            var reverse = db.GetColumnFamily("reverse1");
+            var wop = new WriteOptions();
+            var txnOp = new TransactionOptions();
+            string key = "1112";
+            var t1 = Task.Run(async () =>
+            {
+                var txn = new Transaction(db, wop, txnOp);
+                await Task.Delay(700);
+                Console.WriteLine("11110:" + txn.Get(key, reverse));
+                txn.Put(key, "3002", reverse);
+                Console.WriteLine("11111:" + txn.Get(key, reverse));
+                await Task.Delay(1000);
+                Console.WriteLine("11112:" + txn.Get(key, reverse));
+                txn.Put(key, "3002", reverse);
+                Console.WriteLine("11113:" + txn.Get(key, reverse) + ",thread=" + Thread.CurrentThread.ManagedThreadId);
+                txn.Commit();
+            });
+            var t2 = Task.Run(async () =>
+            {
+                await Task.Delay(100);
+                db.Put(key, "44444", reverse);
+                Console.WriteLine("write1:" + db.Get(key, reverse));
+                await Task.Delay(1000);
+                db.Put(key, "444442", reverse);
+                Console.WriteLine("write2:" + db.Get(key, reverse));
+            });
+            Task.WaitAll(t1, t2);
+            Console.WriteLine("end:" + db.Get("11", reverse));
+        }
+        static void Test7()
+        {
+            var dbop = new DbOptions()
+                .SetCreateIfMissing(true)
+                .SetCreateMissingColumnFamilies(true);
+
+            var columnFamilies = new ColumnFamilies
+            {
+                { "reverse1", new ColumnFamilyOptions() },
+                { "reverse2", new ColumnFamilyOptions() },
+            };
+            var db = TransactionDB.Open(dbop, new TransactionDBOptions(), "transaction_db_test2", columnFamilies);
+            var reverse = db.GetColumnFamily("reverse1");
+            var r1 = new Random(1);
+            var r2 = new Random(2);
+            Task.Run(() =>
+            {
+                int times = 0;
+                while (++times <= 1000)
+                {
+                    db.Put("11", r1.Next(2) == 0 ? "a11" : "a12", reverse);
+                    db.Put("22", r1.Next(2) == 0 ? "a22" : "a23", reverse);
+                }
+            });
+            Task.Run(() =>
+            {
+                int times = 0;
+                while (++times <= 1000)
+                {
+                    db.Put("22", r2.Next(2) == 0 ? "a22" : "a23", reverse);
+                    db.Put("11", r2.Next(2) == 0 ? "a11" : "a12", reverse);
+                }
+            });
+            Console.WriteLine(db.Get("11", reverse));
+            Console.WriteLine(db.Get("22", reverse));
         }
 
         static void test6()
@@ -54,6 +173,11 @@ namespace TransactionDBTest
             };
             var db = TransactionDB.Open(dbop, new TransactionDBOptions(), "transaction_db_test2", columnFamilies);
 
+            var cfs = db.GetColumnFamilyHandleMap();
+            foreach (var it in cfs)
+            {
+                Console.WriteLine("cf=" + it.Key);
+            }
             var reverse = db.GetColumnFamily("reverse1");
             db.Put("uno", "one", cf: reverse);
             db.Put("dos", "two", cf: reverse);

@@ -10,6 +10,7 @@ namespace RocksDbSharp
 {
     public class ReadOptions : BDisposable
     {
+        public static ReadOptions DEFAULT = new ReadOptions();
         private IntPtr iterateUpperBound;
 
         public ReadOptions()

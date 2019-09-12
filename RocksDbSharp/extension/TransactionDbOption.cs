@@ -6,6 +6,8 @@ namespace RocksDbSharp
 {
     public class TransactionDBOptions : RocksDBObject
     {
+        public static TransactionDBOptions DEFAULT = new TransactionDBOptions();
+
         public TransactionDBOptions()
         {
             Handle = Native.Instance.rocksdb_transactiondb_options_create();
